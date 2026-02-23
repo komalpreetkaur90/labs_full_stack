@@ -1,13 +1,10 @@
 import type { Employee, Department } from "../types/Employee";
+import { departments as initialDepartments } from "../data/employees";
 
-let departments: Department[] = [
-  { name: "HR", employees: [] },
-  { name: "IT", employees: [] },
-  { name: "Finance", employees: [] },
-];
+// Initialize repo with full dataset
+let departments: Department[] = [...initialDepartments];
 
 export const employeeRepo = {
-
   /** Get all departments with their employees */
   getDepartments(): Department[] {
     return departments;
