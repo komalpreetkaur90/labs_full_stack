@@ -6,11 +6,14 @@ import Department from "./components/Department";
 import AddEmployeeForm from "./components/AddEmployeeForm";
 import Organization from "./components/Organization";
 
-import { departments as initialDepartments } from "./data/employees";
+import { getAllDepartments } from "./services/employeeService"; // <-- use service
 import type { Department as DeptType } from "./types/Employee";
 
 function App() {
-  const [departments, setDepartments] = useState<DeptType[]>(initialDepartments);
+  const [departments, setDepartments] = useState<DeptType[]>(getAllDepartments()); // initialize from repo
+
+  // Refresh state from repository after CRUD operations
+  const refreshDepartments = () => setDepartments(getAllDepartments());
 
   return (
     <Routes>
@@ -28,7 +31,7 @@ function App() {
 
             <AddEmployeeForm
               departments={departments}
-              setDepartments={setDepartments}
+              refreshDepartments={refreshDepartments} // <-- use refresh instead of setDepartments
             />
           </Layout>
         }
