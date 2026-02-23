@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import type { Department, Employee } from "../types/Employee";
+import type { Department} from "../types/Employee";
+import { tryCreateEmployee} from "../services/employeeService";
 
 interface AddEmployeeFormProps {
   departments: Department[];
-  setDepartments: React.Dispatch<React.SetStateAction<Department[]>>;
+  refreshDepartments: () => void; 
 }
 
-export default function AddEmployeeForm({ departments, setDepartments }: AddEmployeeFormProps) {
+export default function AddEmployeeForm({ departments, refreshDepartments }: AddEmployeeFormProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [selectedDept, setSelectedDept] = useState(departments[0]?.name || "");
@@ -15,33 +16,18 @@ export default function AddEmployeeForm({ departments, setDepartments }: AddEmpl
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Clear previous error
     setErrorMessage("");
 
-    // Validation
-    if (firstName.trim().length < 3) {
-      setErrorMessage("First Name must be at least 3 characters.");
+    // Attempt to create employee via service
+    const result = tryCreateEmployee(firstName, lastName, selectedDept);
+
+    if (!result.isValid) {
+      setErrorMessage(result.errors.join(" "));
       return;
     }
 
-    if (!selectedDept) {
-      setErrorMessage("Please select a department.");
-      return;
-    }
-
-    // Clear previous error
-    setErrorMessage("");
-
-    const newEmployee: Employee = { firstName, lastName };
-
-    // Add employee to the selected department
-    setDepartments((prev) =>
-      prev.map((dept) =>
-        dept.name === selectedDept
-          ? { ...dept, employees: [...dept.employees, newEmployee] }
-          : dept
-      )
-    );
+    // Refresh departments from repo
+    refreshDepartments();
 
     // Reset form
     setFirstName("");
@@ -56,7 +42,6 @@ export default function AddEmployeeForm({ departments, setDepartments }: AddEmpl
     >
       <h3>Add New Employee</h3>
 
-      {/* Error message */}
       {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
 
       <div style={{ marginBottom: "10px" }}>
