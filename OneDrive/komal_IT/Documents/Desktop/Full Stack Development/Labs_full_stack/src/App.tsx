@@ -32,7 +32,7 @@ function App() {
 
             <AddEmployeeForm
               departments={departments}
-              refreshDepartments={refreshDepartments} // ✅ fixed
+              refreshDepartments={refreshDepartments} // Pass refresh function to update state after adding an employee
             />
           </Layout>
         }
