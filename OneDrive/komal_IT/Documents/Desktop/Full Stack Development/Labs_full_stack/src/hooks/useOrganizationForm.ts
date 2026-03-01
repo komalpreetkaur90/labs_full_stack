@@ -9,6 +9,7 @@ export function useOrganizationForm(onSuccess: () => void) {
   const [role, setRole] = useState("");
   const [errors, setErrors] = useState<string[]>([]); // store multiple errors
 
+  // Handle form submission
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 

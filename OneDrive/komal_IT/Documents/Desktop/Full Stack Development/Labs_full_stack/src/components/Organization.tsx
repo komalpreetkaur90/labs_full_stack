@@ -7,7 +7,7 @@ export default function Organization() {
   // Store leaders in state to allow dynamic updates when new leaders are added
   const [leaders, setLeaders] = useState<Role[]>([]);
 
-  // Load leaders from repository on component mount
+  // Load leaders from repository on component mount and whenever the organization changes
   useEffect(() => {
     setLeaders(organizationRepo.getAll());
   }, []);

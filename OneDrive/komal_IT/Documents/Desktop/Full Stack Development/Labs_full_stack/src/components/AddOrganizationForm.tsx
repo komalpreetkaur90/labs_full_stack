@@ -4,6 +4,7 @@ interface Props {
   onSuccess: () => void; // tells page to refresh list after adding new leader
 }
 
+// Form component for adding a new leader to the organization
 export default function AddOrganizationForm({ onSuccess }: Props) {
   const {
     firstName,
@@ -19,7 +20,7 @@ export default function AddOrganizationForm({ onSuccess }: Props) {
   return (
     <section style={{ marginTop: "30px" }}>
       <h2>Add New Leader</h2>
-
+      
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: "10px" }}>
           <input
