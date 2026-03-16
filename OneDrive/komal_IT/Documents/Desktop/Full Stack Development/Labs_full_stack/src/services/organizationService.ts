@@ -1,11 +1,11 @@
 import { organizationRepo } from "../repositories/organizationRepo";
 
 export const organizationService = {
-  validate(
+  async validate(
     firstName: string,
     lastName: string,
     role: string
-  ): string[] {
+  ): Promise<string[]> {
     const errors: string[] = [];
 
     // First name minimum 3 characters
@@ -24,9 +24,8 @@ export const organizationService = {
     }
 
     // Role cannot already exist
-    const existing = organizationRepo
-      .getAll()
-      .find((person) => person.role === role);
+    const leaders = await organizationRepo.getAll(); // <-- await the async fetch
+    const existing = leaders.find((person) => person.role === role);
 
     if (existing) {
       errors.push("This role is already occupied.");

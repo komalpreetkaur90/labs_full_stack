@@ -1,26 +1,34 @@
 import type { Leader } from "../types/Organization";
 
-// Initialize repo with dataset
-let organization: Leader[] = [
-  { firstName: "Beth", lastName: "Smith", role: "Manager" },
-  { firstName: "Miguel", lastName: "Lopez", role: "Director" }
-];
-
-//
 export const organizationRepo = {
+  // Fetch all leaders from the backend
+  async getAll(): Promise<Leader[]> {
+    const res = await fetch("http://localhost:3001/api/leaders");
+    if (!res.ok) {
+      throw new Error("Failed to fetch leaders");
+    }
+    return res.json() as Promise<Leader[]>;
+  },
 
-  getAll(): Leader[] {
-    return organization;
+  // Create a new leader in the backend
+  async create(firstName: string, lastName: string, role: string): Promise<Leader> {
+    const res = await fetch("http://localhost:3001/api/leaders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ firstName, lastName, role })
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error?.errors?.join(", ") || "Failed to create leader");
+    }
+
+    return res.json() as Promise<Leader>;
   },
-// Create a new leader in the organization
-  create(firstName: string, lastName: string, role: string): Leader {
-    const newPerson: Leader = { firstName, lastName, role };
-    organization.push(newPerson);
-    return newPerson;
-  },
-// Check if a role already exists in the organization
-  roleExists(role: string): boolean {
-    return organization.some(person => person.role === role);
+
+  // Check if a role already exists in the organization
+  async roleExists(role: string): Promise<boolean> {
+    const leaders: Leader[] = await this.getAll();
+    return leaders.some((person: Leader) => person.role === role);
   }
-
 };

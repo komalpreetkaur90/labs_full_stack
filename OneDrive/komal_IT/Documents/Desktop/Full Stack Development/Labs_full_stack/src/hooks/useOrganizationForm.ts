@@ -1,44 +1,54 @@
 import { useState } from "react";
-import { organizationService } from "../services/organizationService";
 import { organizationRepo } from "../repositories/organizationRepo";
 
-// Named export for the custom hook to manage form state and logic
 export function useOrganizationForm(onSuccess: () => void) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState("");
-  const [errors, setErrors] = useState<string[]>([]); // store multiple errors
+  const [errors, setErrors] = useState<string[]>([]);
 
-  // Handle form submission
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrors([]);
 
-    // Validate inputs using service layer, which returns an array of error messages if validation fails
-    const validationErrors = organizationService.validate(firstName, lastName, role);
+    const newErrors: string[] = [];
 
-    if (validationErrors.length > 0) {
-      setErrors(validationErrors); // show all validation errors
+    if (firstName.length < 3) newErrors.push("First name must be at least 3 characters");
+    if (!lastName) newErrors.push("Last name is required");
+    if (!role) newErrors.push("Role is required");
+
+    // Check if role already exists via backend
+    try {
+      const exists = await organizationRepo.roleExists(role);
+      if (exists) newErrors.push("This role is already occupied");
+    } catch (err) {
+      newErrors.push("Failed to check role. Backend might be down.");
+      console.error(err);
+    }
+
+    if (newErrors.length > 0) {
+      setErrors(newErrors);
       return;
     }
 
-    // Add new leader to the organization using repository layer
-    organizationRepo.create(firstName, lastName, role);
-
-    // Reset form
-    setFirstName("");
-    setLastName("");
-    setRole("");
-    setErrors([]);
-
-    // Notify parent component of successful submission
-    onSuccess();
+    // Create leader via backend
+    try {
+      await organizationRepo.create(firstName, lastName, role);
+      setFirstName("");
+      setLastName("");
+      setRole("");
+      onSuccess(); // refresh parent component
+    } catch (err) {
+      setErrors(["Failed to create leader."]);
+      console.error(err);
+    }
   };
 
   return {
     firstName,
     lastName,
     role,
-    errors,       // expose errors to the component for display
+    errors,
     setFirstName,
     setLastName,
     setRole,

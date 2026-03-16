@@ -1,56 +1,23 @@
 import { useOrganizationForm } from "../hooks/useOrganizationForm";
 
 interface Props {
-  onSuccess: () => void; // tells page to refresh list after adding new leader
+  onSuccess: () => void;
 }
 
-// Form component for adding a new leader to the organization
-export default function AddOrganizationForm({ onSuccess }: Props) {
-  const {
-    firstName,
-    lastName,
-    role,
-    errors,           // < updated to errors
-    setFirstName,
-    setLastName,
-    setRole,
-    handleSubmit,
-  } = useOrganizationForm(onSuccess);
+export function AddOrganizationForm({ onSuccess }: Props) {
+  const { firstName, lastName, role, errors, setFirstName, setLastName, setRole, handleSubmit } =
+    useOrganizationForm(onSuccess);
 
   return (
     <section style={{ marginTop: "30px" }}>
       <h2>Add New Leader</h2>
-      
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "10px" }}>
-          <input
-            type="text"
-            placeholder="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-        </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <input
-            type="text"
-            placeholder="Role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          />
-        </div>
+        <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name" />
+        <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name" />
+        <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
 
         {errors.length > 0 && (
-          <ul style={{ color: "red", marginBottom: "10px" }}>
+          <ul>
             {errors.map((err, idx) => (
               <li key={idx}>{err}</li>
             ))}
