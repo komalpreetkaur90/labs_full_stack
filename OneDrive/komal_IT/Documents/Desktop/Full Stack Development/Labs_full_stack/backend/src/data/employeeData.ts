@@ -1,6 +1,6 @@
-import type { Leader } from "../types/Leader";
+import type { Employee } from "../types/Employee";
 
-export const leaders: Leader[] = [
+export const employees: Employee[] = [
   { firstName: "Jo-Anne", lastName: "Sinclair", role: "CEO/Chair of Board" },
   { firstName: "Jackson", lastName: "Smith", role: "COO/VP Operations" },
   { firstName: "Susan", lastName: "Thomas", role: "CFO/VP Administration" },
@@ -38,10 +38,5 @@ export const leaders: Leader[] = [
   { firstName: "Tim", lastName: "Morrison", role: "Manager, Data Center and Hosting Services" },
   { firstName: "Aleksandr", lastName: "Milosevic", role: "Manager of IT Risk Management" },
   { firstName: "Jim", lastName: "Wingnut", role: "Manager IT, project management office" },
-  { firstName: "Left", lastName: "Vacant", role: "Reserved for future expansion" },
-  { firstName: "Left", lastName: "Vacant", role: "Reserved for future expansion" },
-  { firstName: "Left", lastName: "Vacant", role: "Reserved for future expansion" },
-  { firstName: "Left", lastName: "Vacant", role: "Reserved for future expansion" },
-  { firstName: "Left", lastName: "Vacant", role: "Reserved for future expansion" },
   { firstName: "Left", lastName: "Vacant", role: "Reserved for future expansion" }
 ];

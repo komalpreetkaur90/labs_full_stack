@@ -1,6 +1,6 @@
 import express from "express"
 import cors from "cors"
-import organizationRoutes from "./routes/organizationRoutes"
+import employeeRoutes from "./routes/employeeRoutes"
 
 const app = express()
 
@@ -12,7 +12,7 @@ app.use(cors({
 app.use(express.json())
 
 // Keep the API routes organized in a separate file
-app.use("/api", organizationRoutes)
+app.use("/api", employeeRoutes)
 
 const PORT = 3001
 
