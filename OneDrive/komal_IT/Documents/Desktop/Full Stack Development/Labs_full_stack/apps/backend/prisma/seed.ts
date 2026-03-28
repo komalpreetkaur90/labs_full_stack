@@ -10,8 +10,9 @@ const roleSeedData = [
 ];
 
 const employeeSeedData = [
-  { firstName: "Komalpreet", lastName: "Kaur", email: "komal@example.com", roleId: 1 },
-  { firstName: "Harman", lastName: "Kaur", email: "harman@example.com", roleId: 2 },
+  { firstName: "Komalpreet", lastName: "Kaur", email: "komal@9872.com", roleId: 1 },
+  { firstName: "Harman", lastName: "Kaur", email: "harman@9872.com", roleId: 2 },
+  { firstName: "Simran", lastName: "Kaur", email: "simran@9872.com", roleId: 3 }
 ];
 
 async function main() {
@@ -41,5 +42,4 @@ main()
   .catch(async (e) => {
     console.error(e);
     await prisma.$disconnect();
-    process.exit(1);
   });
