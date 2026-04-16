@@ -1,8 +1,11 @@
 import type { Leader } from "../types/Organization";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001";
+const API_URL = `${API_BASE_URL}/api/leaders`;
+
 export const organizationRepo = {
   async getAll(): Promise<Leader[]> {
-    const res = await fetch("http://localhost:3001/api/leaders");
+    const res = await fetch(API_URL);
     if (!res.ok) {
       throw new Error("Failed to fetch leaders");
     }
@@ -10,7 +13,7 @@ export const organizationRepo = {
   },
 
   async create(firstName: string, lastName: string, role: string, token: string): Promise<Leader> {
-    const res = await fetch("http://localhost:3001/api/leaders", {
+    const res = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

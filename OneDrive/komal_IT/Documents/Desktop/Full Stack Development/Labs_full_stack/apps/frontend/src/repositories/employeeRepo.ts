@@ -1,6 +1,7 @@
 import type { Employee } from "../types/Employee";
 
-const API_URL = "http://localhost:3001/api/employees";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001";
+const API_URL = `${API_BASE_URL}/api/employees`;
 
 export const employeeRepo = {
   /** Get all employees from backend */
