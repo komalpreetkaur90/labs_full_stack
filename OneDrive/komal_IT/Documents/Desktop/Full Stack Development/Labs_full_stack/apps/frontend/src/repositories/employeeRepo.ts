@@ -16,18 +16,21 @@ export const employeeRepo = {
   async createEmployee(
     firstName: string,
     lastName: string,
-    role: string
+    role: string,
+    token: string
   ): Promise<Employee> {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({ firstName, lastName, role }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to create employee");
+      const error = await response.json().catch(() => null);
+      throw new Error(error?.error || "Failed to create employee");
     }
 
     return await response.json();

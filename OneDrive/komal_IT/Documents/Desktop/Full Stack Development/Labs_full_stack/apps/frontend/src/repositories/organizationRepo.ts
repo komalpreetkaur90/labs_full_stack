@@ -1,7 +1,6 @@
 import type { Leader } from "../types/Organization";
 
 export const organizationRepo = {
-  // Fetch all leaders from the backend
   async getAll(): Promise<Leader[]> {
     const res = await fetch("http://localhost:3001/api/leaders");
     if (!res.ok) {
@@ -10,25 +9,26 @@ export const organizationRepo = {
     return res.json() as Promise<Leader[]>;
   },
 
-  // Create a new leader in the backend
-  async create(firstName: string, lastName: string, role: string): Promise<Leader> {
+  async create(firstName: string, lastName: string, role: string, token: string): Promise<Leader> {
     const res = await fetch("http://localhost:3001/api/leaders", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({ firstName, lastName, role })
     });
 
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error?.errors?.join(", ") || "Failed to create leader");
+      const error = await res.json().catch(() => null);
+      throw new Error(error?.error || "Failed to create leader");
     }
 
     return res.json() as Promise<Leader>;
   },
 
-  // Check if a role already exists in the organization
   async roleExists(role: string): Promise<boolean> {
-    const leaders: Leader[] = await this.getAll();
-    return leaders.some((person: Leader) => person.role === role);
+    const leaders = await this.getAll();
+    return leaders.some((person: Leader) => person.role.toLowerCase() === role.toLowerCase());
   }
 };

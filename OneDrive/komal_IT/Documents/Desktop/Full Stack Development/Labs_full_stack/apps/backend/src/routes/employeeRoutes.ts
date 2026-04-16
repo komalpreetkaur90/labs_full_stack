@@ -1,9 +1,10 @@
-import { Router } from "express"
-import { getEmployees, createEmployee } from "../controllers/employeeController"
+import { Router } from "express";
+import { requireAuth } from "@clerk/express";
+import { getEmployees, createEmployee } from "../controllers/employeeController";
 
-const router = Router()
+const router = Router();
 
-router.get("/", getEmployees)
-router.post("/", createEmployee)
+router.get("/", getEmployees);
+router.post("/", requireAuth(), createEmployee);
 
-export default router
+export default router;

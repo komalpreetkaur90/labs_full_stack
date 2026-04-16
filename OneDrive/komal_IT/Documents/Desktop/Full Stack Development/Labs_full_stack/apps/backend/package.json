@@ -10,7 +10,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
+    "@clerk/express": "^2.1.2",
     "@prisma/client": "^7.6.0",
+    "@tsconfig/node20": "^20.1.9",
     "cors": "^2.8.6",
     "express": "^5.2.1"
   },

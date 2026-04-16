@@ -1,21 +1,31 @@
-import express from "express"
-import cors from "cors"
-import employeeRoutes from "./routes/employeeRoutes"
+import dotenv from "dotenv";
+dotenv.config();
 
-const app = express()
+import express from "express";
+import cors from "cors";
+import { clerkMiddleware } from "@clerk/express";
+import employeeRoutes from "./routes/employeeRoutes";
+import organizationRoutes from "./routes/organizationRoutes";
 
-// Allow only the Vite front-end to access the API
+const app = express();
+
 app.use(cors({
-  origin: "http://localhost:5173" // Vite front-end port
-}))
+  origin: "http://localhost:5173"
+}));
 
-app.use(express.json())
+app.use(express.json());
+app.use(
+  clerkMiddleware({
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+    secretKey: process.env.CLERK_SECRET_KEY
+  })
+);
 
-// Keep the API routes organized in a separate file
-app.use("/api/employees", employeeRoutes)
+app.use("/api/employees", employeeRoutes);
+app.use("/api/leaders", organizationRoutes);
 
-const PORT = 3001
+const PORT = 3001;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});
