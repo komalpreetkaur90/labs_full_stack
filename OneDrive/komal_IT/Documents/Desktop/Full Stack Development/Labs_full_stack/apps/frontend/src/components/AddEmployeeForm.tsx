@@ -1,71 +1,157 @@
-import React, { useState } from "react";
-import type { Department} from "../types/Employee";
-import { tryCreateEmployee} from "../services/employeeService";
+import React, { useEffect, useState } from "react";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  useAuth
+} from "@clerk/clerk-react";
+import { employeeRepo } from "../repositories/employeeRepo";
+import type { Department } from "../types/Employee";
 
 interface AddEmployeeFormProps {
   departments: Department[];
-  refreshDepartments: () => void; 
+  refreshDepartments: () => Promise<void> | void;
 }
 
-export default function AddEmployeeForm({ departments, refreshDepartments }: AddEmployeeFormProps) {
+export default function AddEmployeeForm({
+  departments,
+  refreshDepartments
+}: AddEmployeeFormProps) {
+  const { getToken } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [selectedDept, setSelectedDept] = useState(departments[0]?.name || "");
+  const [selectedDept, setSelectedDept] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (departments.length > 0 && !selectedDept) {
+      setSelectedDept(departments[0].name);
+    }
+  }, [departments, selectedDept]);
+
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     setErrorMessage("");
 
-    // Attempt to create employee via service
-    const result = tryCreateEmployee(firstName, lastName, selectedDept);
+    const errors: string[] = [];
+    if (firstName.trim().length < 3) {
+      errors.push("First name must be at least 3 characters.");
+    }
+    if (!lastName.trim()) {
+      errors.push("Last name is required.");
+    }
+    if (!departments.some((department) => department.name === selectedDept)) {
+      errors.push("Selected department does not exist.");
+    }
 
-    if (!result.isValid) {
-      setErrorMessage(result.errors.join(" "));
+    if (errors.length > 0) {
+      setErrorMessage(errors.join(" "));
       return;
     }
 
-    // Refresh departments from repo
-    refreshDepartments();
+    setLoading(true);
 
-    // Reset form
-    setFirstName("");
-    setLastName("");
-    setSelectedDept(departments[0]?.name || "");
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        setErrorMessage("User not authenticated. Please log in.");
+        return;
+      }
+
+      await employeeRepo.createEmployee(
+        firstName.trim(),
+        lastName.trim(),
+        selectedDept,
+        token
+      );
+
+      await refreshDepartments();
+      setFirstName("");
+      setLastName("");
+      setSelectedDept(departments[0]?.name || "");
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error instanceof Error ? error.message : "Error creating employee");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{ marginTop: "20px", borderTop: "1px solid #ccc", paddingTop: "20px" }}
-    >
-      <h3>Add New Employee</h3>
+    <>
+      <SignedIn>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            marginTop: "20px",
+            borderTop: "1px solid #ccc",
+            paddingTop: "20px"
+          }}
+        >
+          <h3>Add New Employee</h3>
+          {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
 
-      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+          <div>
+            <label htmlFor="firstName">First Name:</label>
+            <input
+              id="firstName"
+              name="firstName"
+              value={firstName}
+              onChange={(e) => setFirstName(e.currentTarget.value)}
+            />
+          </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label style={{ marginRight: "5px" }}>First Name:</label>
-        <input value={firstName} onChange={(e) => setFirstName(e.currentTarget.value)} />
-      </div>
+          <div>
+            <label htmlFor="lastName">Last Name:</label>
+            <input
+              id="lastName"
+              name="lastName"
+              value={lastName}
+              onChange={(e) => setLastName(e.currentTarget.value)}
+            />
+          </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label style={{ marginRight: "5px" }}>Last Name:</label>
-        <input value={lastName} onChange={(e) => setLastName(e.currentTarget.value)} />
-      </div>
+          <div>
+            <label htmlFor="department">Department:</label>
+            <select
+              id="department"
+              name="department"
+              value={selectedDept}
+              onChange={(e) => setSelectedDept(e.currentTarget.value)}
+            >
+              {departments.map((department) => (
+                <option key={department.name} value={department.name}>
+                  {department.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label style={{ marginRight: "5px" }}>Department:</label>
-        <select value={selectedDept} onChange={(e) => setSelectedDept(e.currentTarget.value)}>
-          {departments.map((d) => (
-            <option key={d.name} value={d.name}>
-              {d.name}
-            </option>
-          ))}
-        </select>
-      </div>
+          <button type="submit" disabled={loading}>
+            {loading ? "Adding..." : "Add Employee"}
+          </button>
+        </form>
+      </SignedIn>
 
-      <button type="submit">Add Employee</button>
-    </form>
+      <SignedOut>
+        <div
+          style={{
+            marginTop: "20px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            padding: "16px",
+            maxWidth: "320px"
+          }}
+        >
+          <h3>Add New Employee</h3>
+          <p>You must log in to add employees.</p>
+          <SignInButton mode="modal">
+            <button type="button">Log In</button>
+          </SignInButton>
+        </div>
+      </SignedOut>
+    </>
   );
 }

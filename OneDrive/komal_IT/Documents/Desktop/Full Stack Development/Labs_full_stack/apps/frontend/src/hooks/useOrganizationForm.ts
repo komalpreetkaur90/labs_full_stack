@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { organizationRepo } from "../repositories/organizationRepo";
 
-export function useOrganizationForm(onSuccess: () => void) {
+export function useOrganizationForm(
+  onSuccess: () => Promise<void> | void,
+  getToken: () => Promise<string | null>
+) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -13,16 +17,15 @@ export function useOrganizationForm(onSuccess: () => void) {
 
     const newErrors: string[] = [];
 
-    if (firstName.length < 3) newErrors.push("First name must be at least 3 characters");
-    if (!lastName) newErrors.push("Last name is required");
-    if (!role) newErrors.push("Role is required");
+    if (firstName.trim().length < 3) newErrors.push("First name must be at least 3 characters.");
+    if (!lastName.trim()) newErrors.push("Last name is required.");
+    if (!role.trim()) newErrors.push("Role is required.");
 
-    // Check if role already exists via backend
     try {
       const exists = await organizationRepo.roleExists(role);
-      if (exists) newErrors.push("This role is already occupied");
+      if (exists) newErrors.push("This role is already occupied.");
     } catch (err) {
-      newErrors.push("Failed to check role. Backend might be down.");
+      newErrors.push("Failed to check whether this role is already occupied.");
       console.error(err);
     }
 
@@ -31,16 +34,26 @@ export function useOrganizationForm(onSuccess: () => void) {
       return;
     }
 
-    // Create leader via backend
     try {
-      await organizationRepo.create(firstName, lastName, role);
+      setLoading(true);
+      const token = await getToken();
+
+      if (!token) {
+        setErrors(["You must log in to add leaders."]);
+        return;
+      }
+
+      await organizationRepo.create(firstName.trim(), lastName.trim(), role.trim(), token);
       setFirstName("");
       setLastName("");
       setRole("");
-      onSuccess(); // refresh parent component
+      await onSuccess();
     } catch (err) {
-      setErrors(["Failed to create leader."]);
+      const message = err instanceof Error ? err.message : "Failed to create leader.";
+      setErrors([message]);
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,5 +66,6 @@ export function useOrganizationForm(onSuccess: () => void) {
     setLastName,
     setRole,
     handleSubmit,
+    loading,
   };
 }

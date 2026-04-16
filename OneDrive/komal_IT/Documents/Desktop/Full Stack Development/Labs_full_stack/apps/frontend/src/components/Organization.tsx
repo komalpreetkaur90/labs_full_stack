@@ -1,22 +1,24 @@
 import { useEffect, useState } from "react";
-import type { Role } from "../types/Role";
 import { AddOrganizationForm } from "./AddOrganizationForm";
 import { organizationRepo } from "../repositories/organizationRepo";
+import type { Leader } from "../types/Organization";
 
 export default function Organization() {
-  const [leaders, setLeaders] = useState<Role[]>([]);
+  const [leaders, setLeaders] = useState<Leader[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchLeaders = async () => {
-      try {
-        const data = await organizationRepo.getAll();
-        setLeaders(data);
-      } catch (err: any) {
-        setError(err.message || "Failed to load leaders");
-      }
-    };
+  const fetchLeaders = async () => {
+    try {
+      const data = await organizationRepo.getAll();
+      setLeaders(data);
+      setError(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load leaders";
+      setError(message);
+    }
+  };
 
+  useEffect(() => {
     fetchLeaders();
   }, []);
 
@@ -35,7 +37,7 @@ export default function Organization() {
           fontFamily: "Arial, sans-serif",
         }}
       >
-        {leaders.map((leader: Role, idx: number) => (
+        {leaders.map((leader, idx) => (
           <div key={idx} style={{ display: "contents" }}>
             <div style={{ fontWeight: "bold" }}>
               {leader.firstName} {leader.lastName}
@@ -47,12 +49,7 @@ export default function Organization() {
         ))}
       </div>
 
-      <AddOrganizationForm
-        onSuccess={async () => {
-          const data = await organizationRepo.getAll();
-          setLeaders(data);
-        }}
-      />
+      <AddOrganizationForm onSuccess={fetchLeaders} />
     </section>
   );
 }
