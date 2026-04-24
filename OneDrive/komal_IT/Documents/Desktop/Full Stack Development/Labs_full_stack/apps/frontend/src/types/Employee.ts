@@ -4,6 +4,14 @@ export interface Employee {
   role: string;
 }
 
+export interface PaginatedResponse<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 export interface Department {
   name: string;           // department name
   employees: Employee[];  // array of employees
