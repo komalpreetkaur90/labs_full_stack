@@ -8,10 +8,35 @@ import employeeRoutes from "./routes/employeeRoutes";
 import organizationRoutes from "./routes/organizationRoutes";
 
 const app = express();
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL
+].filter(Boolean) as string[];
 
-app.use(cors({
-  origin: "http://localhost:5173"
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      try {
+        const hostname = new URL(origin).hostname;
+
+        if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(hostname)) {
+          callback(null, true);
+          return;
+        }
+      } catch {
+        callback(new Error("Invalid origin"));
+        return;
+      }
+
+      callback(new Error("Origin not allowed by CORS"));
+    }
+  })
+);
 
 app.use(express.json());
 app.use(

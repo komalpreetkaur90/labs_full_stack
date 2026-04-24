@@ -3,7 +3,9 @@ import { getAuth } from "@clerk/express";
 import { employeeService } from "../services/employeeService";
 
 export const getEmployees = (req: Request, res: Response) => {
-  const employees = employeeService.getEmployees();
+  const page = Number.parseInt(String(req.query.page ?? "1"), 10);
+  const pageSize = Number.parseInt(String(req.query.pageSize ?? "8"), 10);
+  const employees = employeeService.getEmployeesPage(page, pageSize);
   res.json(employees);
 };
 

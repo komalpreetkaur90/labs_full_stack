@@ -1,11 +1,12 @@
-import type { Employee } from "../types/Employee";
+import type { Employee, PaginatedResponse } from "../types/Employee";
 
-const API_URL = "http://localhost:3001/api/employees";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001";
+const API_URL = `${API_BASE_URL}/api/employees`;
 
 export const employeeRepo = {
   /** Get all employees from backend */
-  async getEmployees(): Promise<Employee[]> {
-    const response = await fetch(API_URL);
+  async getEmployees(page = 1, pageSize = 8): Promise<PaginatedResponse<Employee>> {
+    const response = await fetch(`${API_URL}?page=${page}&pageSize=${pageSize}`);
     if (!response.ok) {
       throw new Error("Failed to fetch employees");
     }

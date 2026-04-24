@@ -2,8 +2,10 @@ import type { Request, Response } from "express";
 import { getAuth } from "@clerk/express";
 import { organizationService } from "../services/organizationService";
 
-export const getOrganizations = (_req: Request, res: Response) => {
-  res.json(organizationService.getOrganizations());
+export const getOrganizations = (req: Request, res: Response) => {
+  const page = Number.parseInt(String(req.query.page ?? "1"), 10);
+  const pageSize = Number.parseInt(String(req.query.pageSize ?? "8"), 10);
+  res.json(organizationService.getOrganizationsPage(page, pageSize));
 };
 
 export const createOrganization = (req: Request, res: Response) => {
